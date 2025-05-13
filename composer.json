@@ -1,0 +1,44 @@
+{
+  "name": "quasarstream/rtcp",
+  "type": "library",
+  "description": "A pure PHP implementation of RTP Control Protocol (RTCP) packet parsing and generation, compliant with RFC 3550 and related specifications.",
+  "keywords": [
+    "rtp",
+    "rtcp"
+  ],
+  "homepage": "https://www.quasarstream.com/webrtc",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Amin Yazdanpanah",
+      "email": "github@aminyazdanpanah.com"
+    },
+    {
+      "name": "Sana Moniri",
+      "email": "s.mo@quasarstream.com"
+    },
+    {
+      "name": "Quasar Stream Community",
+      "homepage": "https://quasarstream.com/teams"
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "quasarstream/exception": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/php-code-coverage": "11.0.x-dev",
+    "phpunit/phpunit": "^11.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webrtc\\RTCP\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\Webrtc\\RTCP\\": "tests"
+    }
+  },
+  "minimum-stability": "dev"
+}
