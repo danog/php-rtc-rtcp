@@ -50,11 +50,17 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
      */
     public function encode(): string
     {
-        $ntpTimestamp = gmp_init($this->ntpTimestamp);
-        $high = gmp_div($ntpTimestamp, '4294967296');
-        $low = gmp_mod($ntpTimestamp, '4294967296');
-        return pack('NNNNN', gmp_intval($high), gmp_intval($low),
-            $this->rtpTimestamp, $this->packetCount, $this->octetCount);
+        // The raw 64-bit NTP bit pattern is split into its two halves; masking keeps this
+        // correct even when the value does not fit in a signed PHP integer.
+        $ntpTimestamp = (int) $this->ntpTimestamp;
+        return pack(
+            'NNNNN',
+            ($ntpTimestamp >> 32) & 0xFFFFFFFF,
+            $ntpTimestamp & 0xFFFFFFFF,
+            $this->rtpTimestamp,
+            $this->packetCount,
+            $this->octetCount
+        );
     }
 
     /**
@@ -72,7 +78,7 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
         }
 
         $unpacked = unpack('NntpHigh/NntpLow/NrtpTimestamp/NpacketCount/NoctetCount', $data);
-        $ntpTimestamp = gmp_strval(gmp_add(gmp_mul($unpacked['ntpHigh'], '4294967296'), $unpacked['ntpLow']));
+        $ntpTimestamp = (string) ((((int) $unpacked['ntpHigh']) << 32) | (int) $unpacked['ntpLow']);
 
         return new self(
             $ntpTimestamp,
