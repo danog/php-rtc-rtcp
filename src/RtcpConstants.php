@@ -14,22 +14,22 @@ namespace Webrtc\RTCP;
 class RtcpConstants
 {
     // Header lengths
-    const int RTCP_HEADER_LENGTH = 4;
+    const RTCP_HEADER_LENGTH = 4;
 
     // RTCP packet types
-    const int RTCP_SR = 200;
-    const int RTCP_RR = 201;
-    const int RTCP_SDES = 202;
-    const int RTCP_BYE = 203;
-    const int RTCP_RTPFB = 205;
-    const int RTCP_PSFB = 206;
+    const RTCP_SR = 200;
+    const RTCP_RR = 201;
+    const RTCP_SDES = 202;
+    const RTCP_BYE = 203;
+    const RTCP_RTPFB = 205;
+    const RTCP_PSFB = 206;
 
     // RTCP Feedback Message Types
-    const int RTCP_RTPFB_NACK = 1;
+    const RTCP_RTPFB_NACK = 1;
 
     // RTCP Payload-Specific Feedback Messages
-    const int RTCP_PSFB_PLI = 1;
-    const int RTCP_PSFB_SLI = 2;
-    const int RTCP_PSFB_RPSI = 3;
-    const int RTCP_PSFB_APP = 15;
+    const RTCP_PSFB_PLI = 1;
+    const RTCP_PSFB_SLI = 2;
+    const RTCP_PSFB_RPSI = 3;
+    const RTCP_PSFB_APP = 15;
 }
