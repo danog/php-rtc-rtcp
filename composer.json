@@ -24,7 +24,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "quasarstream/exception": "^1.0"
+        "danog/php-rtc-exception": "^1.0"
     },
     "require-dev": {
         "phpunit/php-code-coverage": "11.0.x-dev",
@@ -40,8 +40,5 @@
             "Tests\\Webrtc\\RTCP\\": "tests"
         }
     },
-    "minimum-stability": "dev",
-    "replace": {
-        "quasarstream/rtcp": "self.version"
-    }
+    "minimum-stability": "dev"
 }
