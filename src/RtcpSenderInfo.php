@@ -30,13 +30,13 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
     /**
      * Constructs new sender info block
      *
-     * @param string $ntpTimestamp 64-bit NTP timestamp as GMP string
      * @param int $rtpTimestamp Media timestamp
      * @param int $packetCount Total packets sent
      * @param int $octetCount Total payload bytes sent
      */
     public function __construct(
-        private string $ntpTimestamp,
+        private int $ntpTimestampHigh,
+        private int $ntpTimestampLow,
         private int    $rtpTimestamp,
         private int    $packetCount,
         private int    $octetCount
@@ -50,13 +50,10 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
      */
     public function encode(): string
     {
-        // The raw 64-bit NTP bit pattern is split into its two halves; masking keeps this
-        // correct even when the value does not fit in a signed PHP integer.
-        $ntpTimestamp = (int) $this->ntpTimestamp;
         return pack(
-            'NNNNN',
-            ($ntpTimestamp >> 32) & 0xFFFFFFFF,
-            $ntpTimestamp & 0xFFFFFFFF,
+            'NNNNNN',
+            $this->ntpTimestampHigh,
+            $this->ntpTimestampLow,
             $this->rtpTimestamp,
             $this->packetCount,
             $this->octetCount
@@ -78,10 +75,10 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
         }
 
         $unpacked = unpack('NntpHigh/NntpLow/NrtpTimestamp/NpacketCount/NoctetCount', $data);
-        $ntpTimestamp = (string) ((((int) $unpacked['ntpHigh']) << 32) | (int) $unpacked['ntpLow']);
 
         return new self(
-            $ntpTimestamp,
+            $unpacked['ntpHigh'],
+            $unpacked['ntpLow'],
             $unpacked['rtpTimestamp'],
             $unpacked['packetCount'],
             $unpacked['octetCount']
@@ -90,12 +87,15 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
 
     /**
      * Get NTP timestamp
-     *
-     * @return string 64-bit timestamp as GMP string
      */
-    public function getNtpTimestamp(): string
+    public function getNtpTimestampHigh(): int
     {
-        return $this->ntpTimestamp;
+        return $this->ntpTimestampHigh;
+    }
+
+    public function getNtpTimestampLow(): int
+    {
+        return $this->ntpTimestampLow;
     }
 
     /**
