@@ -1,10 +1,16 @@
 # RTCP Library for PHP
 
 
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.4-blue.svg)](https://php.net/)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-blue.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 A pure PHP implementation of RTP Control Protocol (RTCP) packet parsing and generation, compliant with RFC 3550 and related specifications.
+
+## About this fork
+
+This is the `danog/php-rtc-rtcp` fork used by MadelineProto. It targets PHP 8.2+ and fixes sender-report comparisons for unsigned 64-bit NTP timestamps.
+
+The forked stack keeps the upstream `quasarstream/*` dependency constraints for compatibility. Each `danog/php-rtc-*` package replaces its upstream counterpart, so consumers select the complete maintained stack by requiring the corresponding danog packages together.
 
 ##  Features
 
@@ -21,7 +27,7 @@ A pure PHP implementation of RTP Control Protocol (RTCP) packet parsing and gene
 
 ## Requirements
 
-- PHP ≥ 8.4
+- PHP ≥ 8.2
 
 ## Documentation
 

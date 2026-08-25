@@ -1,7 +1,7 @@
 {
     "name": "danog/php-rtc-rtcp",
     "type": "library",
-    "description": "A pure PHP implementation of RTP Control Protocol (RTCP) packet parsing and generation, compliant with RFC 3550 and related specifications. Fork with FFI made optional and a pure-PHP DTLS/SRTP stack, maintained for MadelineProto.",
+    "description": "Pure-PHP RTCP packet parsing and generation. MadelineProto's PHP 8.2+ fork fixes unsigned NTP handling and integrates with the modular danog/php-rtc stack.",
     "keywords": [
         "rtp",
         "rtcp"
