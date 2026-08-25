@@ -51,7 +51,7 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
     public function encode(): string
     {
         return pack(
-            'NNNNNN',
+            'NNNNN',
             $this->ntpTimestampHigh,
             $this->ntpTimestampLow,
             $this->rtpTimestamp,

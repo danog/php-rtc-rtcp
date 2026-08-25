@@ -188,12 +188,10 @@ class RtcpPacketTest extends TestCase {
         $packet = $packets[0];
         $this->assertInstanceOf(RtcpSrPacket::class, $packet);
         $this->assertEquals(1831097322, $packet->getSsrc());
-        // The NTP timestamp is an unsigned 64-bit field, so it is negative as a PHP integer:
-        // comparing against the literal would compare against a lossy float.
-        $hi = $packet->getSenderInfo()->getNtpTimestampHigh();
-        $lo = $packet->getSenderInfo()->getNtpTimestampLow();
-        $combined = ($hi << 32) | $lo;
-        $this->assertSame(16016567581311369308, $combined);
+        // Compare the wire-level halves independently: the combined unsigned value is
+        // larger than PHP_INT_MAX and an integer literal would become a lossy float.
+        $this->assertSame(3729147739, $packet->getSenderInfo()->getNtpTimestampHigh());
+        $this->assertSame(354025564, $packet->getSenderInfo()->getNtpTimestampLow());
         $this->assertEquals(1722342718, $packet->getSenderInfo()->getRtpTimestamp());
         $this->assertEquals(269, $packet->getSenderInfo()->getPacketCount());
         $this->assertEquals(13557, $packet->getSenderInfo()->getOctetCount());
