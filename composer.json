@@ -30,7 +30,7 @@
         "danog/php-rtc-exception": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.3"
+        "phpunit/phpunit": "^13.0"
     },
     "autoload": {
         "psr-4": {
@@ -42,5 +42,5 @@
             "Tests\\Webrtc\\RTCP\\": "tests"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
