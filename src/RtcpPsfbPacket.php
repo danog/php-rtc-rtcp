@@ -26,7 +26,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  * - RPSI (Reference Picture Selection Indication)
  * - FIR (Full Intra Request)
  */
-readonly class RtcpPsfbPacket implements RtcpPacketInterface
+final readonly class RtcpPsfbPacket implements RtcpPacketInterface
 {
     /**
      * Constructs a new RtcpPsfbPacket instance.
@@ -55,6 +55,7 @@ readonly class RtcpPsfbPacket implements RtcpPacketInterface
      *
      * @return string Binary representation of the PSFB packet
      */
+    #[\Override]
     public function encode(): string
     {
         $payload = pack('NN', $this->ssrc, $this->mediaSsrc) . $this->fci;
@@ -65,22 +66,28 @@ readonly class RtcpPsfbPacket implements RtcpPacketInterface
      * Decodes binary data into an RtcpPsfbPacket instance
      *
      * @param string $data Binary PSFB packet data (without header)
-     * @param int $fmt Feedback message type from header
+     * @param int $count Feedback message type from header
      * @return self New RtcpPsfbPacket instance
      * @throws RtcpPacketException If data is too short (less than 8 bytes)
      */
-    public static function decode(string $data, int $fmt): self
+    #[\Override]
+    public static function decode(string $data, int $count): self
     {
         if (strlen($data) < 8) {
             throw new RtcpPacketException("RTCP payload-specific feedback length is invalid");
         }
 
         $unpacked = unpack('Nssrc/NmediaSsrc', $data);
+        if ($unpacked === false) {
+            throw new RtcpPacketException("RTCP payload-specific feedback is invalid");
+        }
+
+        /** @var array{ssrc: int, mediaSsrc: int} $unpacked */
         $ssrc = $unpacked['ssrc'];
         $mediaSsrc = $unpacked['mediaSsrc'];
         $fci = substr($data, 8);
 
-        return new self($fmt, $ssrc, $mediaSsrc, $fci);
+        return new self($count, $ssrc, $mediaSsrc, $fci);
     }
 
     /**

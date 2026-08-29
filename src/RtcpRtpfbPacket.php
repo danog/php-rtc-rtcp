@@ -24,7 +24,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  *
  * @see https://datatracker.ietf.org/doc/html/rfc4585#section-6.2 Defined in RFC 4585 section 6.2
  */
-readonly class RtcpRtpfbPacket implements RtcpPacketInterface
+final readonly class RtcpRtpfbPacket implements RtcpPacketInterface
 {
     /**
      * Constructs a new RTP Feedback packet
@@ -54,6 +54,7 @@ readonly class RtcpRtpfbPacket implements RtcpPacketInterface
      *
      * @return string Binary RTCP RTPFB packet
      */
+    #[\Override]
     public function encode(): string
     {
         $payload = pack('NN', $this->ssrc, $this->mediaSsrc);
@@ -83,23 +84,34 @@ readonly class RtcpRtpfbPacket implements RtcpPacketInterface
      * Decodes binary data into RTPFB packet
      *
      * @param string $data Binary RTPFB packet data (without header)
-     * @param int $fmt Feedback message type from header
+     * @param int $count Feedback message type from header
      * @return self New RtcpRtpfbPacket instance
      * @throws RtcpPacketException If data length is invalid
      */
-    public static function decode(string $data, int $fmt): self
+    #[\Override]
+    public static function decode(string $data, int $count): self
     {
         if (strlen($data) < 8 || strlen($data) % 4 != 0) {
             throw new RtcpPacketException("RTCP RTP feedback length is invalid");
         }
 
         $unpacked = unpack('Nssrc/NmediaSsrc', substr($data, 0, 8));
+        if ($unpacked === false) {
+            throw new RtcpPacketException("RTCP RTP feedback is invalid");
+        }
+
+        /** @var array{ssrc: int, mediaSsrc: int} $unpacked */
         $ssrc = $unpacked['ssrc'];
         $mediaSsrc = $unpacked['mediaSsrc'];
 
         $lost = [];
         for ($pos = 8; $pos < strlen($data); $pos += 4) {
             $unpacked = unpack('npid/nblp', substr($data, $pos, 4));
+            if ($unpacked === false) {
+                throw new RtcpPacketException("RTCP RTP feedback is invalid");
+            }
+
+            /** @var array{pid: int, blp: int} $unpacked */
             $pid = $unpacked['pid'];
             $blp = $unpacked['blp'];
 
@@ -111,7 +123,7 @@ readonly class RtcpRtpfbPacket implements RtcpPacketInterface
             }
         }
 
-        return new self($fmt, $ssrc, $mediaSsrc, $lost);
+        return new self($count, $ssrc, $mediaSsrc, $lost);
     }
 
     /**

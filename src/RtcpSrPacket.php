@@ -24,7 +24,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  *
  * Defined in RFC 3550 section 6.4.1
  */
-readonly class RtcpSrPacket implements RtcpPacketInterface
+final readonly class RtcpSrPacket implements RtcpPacketInterface
 {
     /**
      * Constructs new Sender Report packet
@@ -45,6 +45,7 @@ readonly class RtcpSrPacket implements RtcpPacketInterface
      *
      * @return string Binary RTCP SR packet
      */
+    #[\Override]
     public function encode(): string
     {
         $payload = pack('N', $this->ssrc);
@@ -63,6 +64,7 @@ readonly class RtcpSrPacket implements RtcpPacketInterface
      * @return self New RtcpSrPacket instance
      * @throws RtcpPacketException If data length is invalid
      */
+    #[\Override]
     public static function decode(string $data, int $count): self
     {
         $expectedLength = 24 + 24 * $count;
@@ -70,7 +72,13 @@ readonly class RtcpSrPacket implements RtcpPacketInterface
             throw new RtcpPacketException("RTCP sender report length is invalid");
         }
 
-        $ssrc = unpack('N', substr($data, 0, 4))[1];
+        $unpacked = unpack('N', substr($data, 0, 4));
+        if ($unpacked === false) {
+            throw new RtcpPacketException("RTCP sender report is invalid");
+        }
+
+        /** @var array{1: int} $unpacked */
+        $ssrc = $unpacked[1];
         $senderInfo = RtcpSenderInfo::decode(substr($data, 4, 20));
         $reports = [];
         $pos = 24;

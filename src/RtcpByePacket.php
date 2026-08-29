@@ -24,13 +24,13 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  *
  * The RTCP BYE packet indicates that one or more sources are no longer active.
  */
-readonly class RtcpByePacket implements RtcpPacketInterface
+final readonly class RtcpByePacket implements RtcpPacketInterface
 {
 
     /**
      * Constructs a new RtcpByePacket instance.
      *
-     * @param array $sources List of synchronization sources (SSRCs) to include in the packet.
+     * @param int[] $sources List of synchronization sources (SSRCs) to include in the packet.
      */
     public function __construct(private array $sources = [])
     {
@@ -44,6 +44,7 @@ readonly class RtcpByePacket implements RtcpPacketInterface
      *
      * @return string The binary representation of the RTCP BYE packet.
      */
+    #[\Override]
     public function encode(): string
     {
         $payload = '';
@@ -64,6 +65,7 @@ readonly class RtcpByePacket implements RtcpPacketInterface
      * @return self A new RtcpByePacket instance.
      * @throws RtcpPacketException If the binary data is invalid or the length is incorrect.
      */
+    #[\Override]
     public static function decode(string $data, int $count): self
     {
         if (strlen($data) < 4 * $count) {
@@ -73,7 +75,13 @@ readonly class RtcpByePacket implements RtcpPacketInterface
         $sources = [];
         if ($count > 0) {
             $format = 'N' . $count; // Unpack as 32-bit unsigned big-endian
-            $sources = array_values(unpack($format, $data));
+            $unpacked = unpack($format, $data);
+            if ($unpacked === false) {
+                throw new RtcpPacketException("RTCP bye data is invalid");
+            }
+
+            /** @var list<int> $sources */
+            $sources = array_values($unpacked);
         }
 
         return new self($sources);

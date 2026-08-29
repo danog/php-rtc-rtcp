@@ -11,7 +11,7 @@
 
 namespace Webrtc\RTCP;
 
-class RtcpConstants
+final class RtcpConstants
 {
     // Header lengths
     const RTCP_HEADER_LENGTH = 4;

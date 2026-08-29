@@ -27,7 +27,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  *
  * Defined in RFC 3550 section 6.5
  */
-readonly class RtcpSdesPacket implements RtcpPacketInterface
+final readonly class RtcpSdesPacket implements RtcpPacketInterface
 {
     /**
      * Constructs a new SDES packet
@@ -49,6 +49,7 @@ readonly class RtcpSdesPacket implements RtcpPacketInterface
      * @return string Binary RTCP SDES packet
      * @throws RtcpPacketException If encoding fails
      */
+    #[\Override]
     public function encode(): string
     {
         $payload = '';
@@ -76,6 +77,7 @@ readonly class RtcpSdesPacket implements RtcpPacketInterface
      * @return self New RtcpSdesPacket instance
      * @throws RtcpPacketException If data is invalid or truncated
      */
+    #[\Override]
     public static function decode(string $data, int $count): self
     {
         $pos = 0;
@@ -86,12 +88,23 @@ readonly class RtcpSdesPacket implements RtcpPacketInterface
                 throw new RtcpPacketException("RTCP SDES source is truncated");
             }
 
-            $ssrc = unpack('N', substr($data, $pos, 4))[1];
+            $unpacked = unpack('N', substr($data, $pos, 4));
+            if ($unpacked === false) {
+                throw new RtcpPacketException("RTCP SDES source is invalid");
+            }
+
+            /** @var array{1: int} $unpacked */
+            $ssrc = $unpacked[1];
             $pos += 4;
 
             $items = [];
             while ($pos < strlen($data) - 1) {
                 $unpacked = unpack('Ctype/Clength', substr($data, $pos, 2));
+                if ($unpacked === false) {
+                    throw new RtcpPacketException("RTCP SDES item is invalid");
+                }
+
+                /** @var array{type: int, length: int} $unpacked */
                 $type = $unpacked['type'];
                 $length = $unpacked['length'];
                 $pos += 2;

@@ -28,13 +28,13 @@ namespace Webrtc\RTCP;
  * - NOTE (notice/status)
  * - PRIV (private extensions)
  */
-readonly class RtcpSourceInfo
+final readonly class RtcpSourceInfo
 {
     /**
      * Constructs new source description chunk
      *
      * @param int $ssrc Synchronization source identifier
-     * @param array $items Array of SDES items as [type, value] tuples
+     * @param list<array{0: int, 1: string}> $items Array of SDES items as [type, value] tuples
      */
     public function __construct(private int $ssrc, private array $items = [])
     {
@@ -53,7 +53,7 @@ readonly class RtcpSourceInfo
     /**
      * Get SDES items
      *
-     * @return array Array of [type, value] tuples
+     * @return list<array{0: int, 1: string}> Array of [type, value] tuples
      */
     public function getItems(): array
     {

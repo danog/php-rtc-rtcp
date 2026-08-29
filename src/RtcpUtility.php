@@ -20,7 +20,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  * - Packet loss encoding/decoding
  * - RTCP packet construction
  */
-class RtcpUtility
+final class RtcpUtility
 {
     /**
      * Encodes packet loss count into 24-bit format
@@ -42,7 +42,13 @@ class RtcpUtility
     public static function unpackPacketsLost(string $data): int
     {
         $data = (ord($data[0]) & 0x80) ? "\xFF" . $data : "\x00" . $data;
-        $value = unpack("N", $data)[1];
+        $unpacked = unpack("N", $data);
+        if ($unpacked === false) {
+            return 0;
+        }
+
+        /** @var int $value */
+        $value = $unpacked[1];
 
         if ($value & 0x80000000) {
             $value -= 0x100000000;

@@ -27,7 +27,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  * - Last SR timestamp (LSR)
  * - Delay since last SR (DLSR)
  */
-readonly class RtcpReceiverInfo implements RtcpPacketInterface
+final readonly class RtcpReceiverInfo implements RtcpPacketInterface
 {
     /**
      * Constructs a new receiver report block
@@ -57,6 +57,7 @@ readonly class RtcpReceiverInfo implements RtcpPacketInterface
      *
      * @return string 24-byte binary report block
      */
+    #[\Override]
     public function encode(): string
     {
         $data = pack('NC', $this->ssrc, $this->fractionLost);
@@ -73,6 +74,7 @@ readonly class RtcpReceiverInfo implements RtcpPacketInterface
      * @return self New RtcpReceiverInfo instance
      * @throws RtcpPacketException If data length is not exactly 24 bytes
      */
+    #[\Override]
     public static function decode(string $data, ?int $count = null): self
     {
         if (strlen($data) != 24) {
@@ -80,12 +82,22 @@ readonly class RtcpReceiverInfo implements RtcpPacketInterface
         }
 
         $unpacked = unpack('Nssrc/CfractionLost', $data);
+        if ($unpacked === false) {
+            throw new RtcpPacketException("Receiver report block is invalid");
+        }
+
+        /** @var array{ssrc: int, fractionLost: int} $unpacked */
         $ssrc = $unpacked['ssrc'];
         $fractionLost = $unpacked['fractionLost'];
 
         $packetsLost = RtcpUtility::unpackPacketsLost(substr($data, 5, 3));
 
         $unpacked = unpack('NhighestSequence/Njitter/Nlsr/Ndlsr', substr($data, 8));
+        if ($unpacked === false) {
+            throw new RtcpPacketException("Receiver report block is invalid");
+        }
+
+        /** @var array{highestSequence: int, jitter: int, lsr: int, dlsr: int} $unpacked */
         $highestSequence = $unpacked['highestSequence'];
         $jitter = $unpacked['jitter'];
         $lsr = $unpacked['lsr'];

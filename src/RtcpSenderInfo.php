@@ -25,7 +25,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  *
  * Part of RTCP Sender Report (SR) packet defined in RFC 3550 section 6.4.1
  */
-readonly class RtcpSenderInfo implements RtcpPacketInterface
+final readonly class RtcpSenderInfo implements RtcpPacketInterface
 {
     /**
      * Constructs new sender info block
@@ -48,6 +48,7 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
      *
      * @return string 20-byte binary sender info block
      */
+    #[\Override]
     public function encode(): string
     {
         return pack(
@@ -68,6 +69,7 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
      * @return self New RtcpSenderInfo instance
      * @throws RtcpPacketException If data length is not 20 bytes
      */
+    #[\Override]
     public static function decode(string $data, ?int $count = null): self
     {
         if (strlen($data) != 20) {
@@ -75,7 +77,11 @@ readonly class RtcpSenderInfo implements RtcpPacketInterface
         }
 
         $unpacked = unpack('NntpHigh/NntpLow/NrtpTimestamp/NpacketCount/NoctetCount', $data);
+        if ($unpacked === false) {
+            throw new RtcpPacketException("Sender information block is invalid");
+        }
 
+        /** @var array{ntpHigh: int, ntpLow: int, rtpTimestamp: int, packetCount: int, octetCount: int} $unpacked */
         return new self(
             $unpacked['ntpHigh'],
             $unpacked['ntpLow'],

@@ -24,7 +24,7 @@ use Webrtc\RTCP\Exception\RtcpPacketException;
  * RTCP packets are used alongside RTP to provide quality feedback, participant
  * information, and control information in multimedia streaming sessions.
  */
-class RtcpPacket
+final class RtcpPacket
 {
 
     /**
@@ -34,7 +34,7 @@ class RtcpPacket
      * individual RTCP packets) and returns an array of parsed packet objects.
      *
      * @param string $data The binary RTCP packet data to decode
-     * @return RtcpPacketInterface[] Array of decoded RTCP packet objects
+     * @return list<RtcpPacketInterface> Array of decoded RTCP packet objects
      * @throws RtcpPacketException If the packet is malformed or invalid
      */
     public static function decode(string $data): array
@@ -59,8 +59,8 @@ class RtcpPacket
      *
      * @param string $data The binary packet data
      * @param int $pos Current position in the data (updated by reference)
-     * @return array Associative array containing parsed header fields:
-     *               - Version: RTCP protocol version (must be 2)
+     * @return array{version: int, padding: int, count: int, packet_type: int, length: int} Associative array containing parsed header fields:
+     *               - version: RTCP protocol version (must be 2)
      *               - padding: Whether padding is present
      *               - count: Report count or packet-specific field
      *               - packet_type: RTCP packet type identifier
@@ -73,7 +73,13 @@ class RtcpPacket
             throw new RtcpPacketException("RTCP packet length is less than " . RtcpConstants::RTCP_HEADER_LENGTH . " bytes");
         }
 
-        $header = unpack("Cv_p_count/Cpacket_type/nlength", substr($data, $pos, 4));
+        $unpacked = unpack("Cv_p_count/Cpacket_type/nlength", substr($data, $pos, 4));
+        if ($unpacked === false) {
+            throw new RtcpPacketException("RTCP packet header is invalid");
+        }
+
+        /** @var array{v_p_count: int, packet_type: int, length: int} $header */
+        $header = $unpacked;
         $pos += 4;
 
         $version = $header['v_p_count'] >> 6;
@@ -147,10 +153,10 @@ class RtcpPacket
      * @param int $packetType RTCP packet type identifier
      * @param string $payload The decoded payload data
      * @param int $count Report count or packet-specific field
-     * @return object Instance of the appropriate RTCP packet type
+     * @return RtcpPacketInterface Instance of the appropriate RTCP packet type
      * @throws RtcpPacketException If a packet type is unknown
      */
-    private static function createPacket(int $packetType, string $payload, int $count): object
+    private static function createPacket(int $packetType, string $payload, int $count): RtcpPacketInterface
     {
         return match ($packetType) {
             RtcpConstants::RTCP_BYE => RtcpByePacket::decode($payload, $count),
